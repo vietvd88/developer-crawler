@@ -1,0 +1,40 @@
+.container {
+  position: absolute;
+  left: 10px;
+  /*text-align: center;*/
+}
+
+.container h2 {
+  font-size: 3rem;
+}
+
+.container a {
+  font-size: 1.4rem;
+}
+
+.selectCountry {
+    max-width: 200px;
+    width: 150px;
+    z-index: 100;
+    float: right;
+    margin-right: 10px;
+}
+
+.selectSkill {
+    max-width: 200px;
+    width: 150px;
+    z-index: 100;
+    float: right;
+    margin-right: 10px;
+}
+
+.filterButton {
+    float: right;
+    width: 100px;
+    height: 35px;
+}
+
+.crawlingButton {
+    width: 100px;
+    height: 36px;
+}

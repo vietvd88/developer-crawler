@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello Electron React!</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap-theme.min.css">
+    <script>
+      (function() {
+        if (!process.env.HOT) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = './dist/style.css';
+          // HACK: Writing the script path should be done with webpack
+          document.getElementsByTagName('head')[0].appendChild(link);
+        }
+      }());
+    </script>
+    <script src="./init_app.js"></script>
+  </head>
+  <body>
+    <!-- <button onclick="startCrawling()" style="margin-top: 65px;position: absolute;margin-left: 10px;z-index: 100000"type="button" class="btn btn-sm btn-primary">Start Crawling</button> -->
+
+    <div id="root"></div>
+    <script>
+      // {
+      //   const script = document.createElement('script');
+      //   const port = process.env.PORT || 3000;
+      //   script.src = (process.env.HOT)
+      //     ? 'http://localhost:' + port + '/dist/bundle.js'
+      //     : './dist/bundle.js';
+      //   // HACK: Writing the script path should be done with webpack
+      //   document.body.appendChild(script);
+      // }
+    </script>
+  </body>
+</html>
