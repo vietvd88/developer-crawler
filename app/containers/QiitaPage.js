@@ -1,6 +1,6 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import Github from '../components/Github';
+import Qiita from '../components/Qiita';
 import * as Sorters from '../actions/sort';
 import * as Getters from '../actions/get';
 import * as Comments from '../actions/comment';
@@ -17,4 +17,4 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(Object.assign({}, Sorters, Getters, Comments), dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Github);
+export default connect(mapStateToProps, mapDispatchToProps)(Qiita);

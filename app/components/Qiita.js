@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 import { Link } from 'react-router';
-import styles from './Github.css';
+import styles from './Qiita.css';
 import SortTable from './SortTable'
 import { Button, FormControl, FormGroup, ControlLabel } from 'react-bootstrap';
 

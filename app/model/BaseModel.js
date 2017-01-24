@@ -1,9 +1,11 @@
 // const knex = require('../db/knex')
 
+console.log(__dirname)
+
 const DB = require('knex')({
     client: 'sqlite3',
     connection: {
-        filename: '/Users/vu.viet/jobsearch/mainapp/app/db/app.db'
+        filename: __dirname +'/../db/app.db'
     },
     useNullAsDefault: true
 });

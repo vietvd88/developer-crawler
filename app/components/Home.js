@@ -4,7 +4,6 @@ import { Link } from 'react-router';
 import styles from './Home.css';
 import SortTable from './SortTable'
 import { Button, FormControl } from 'react-bootstrap';
-var FakeObjectDataListStore = require('./FakeObjectDataListStore');
 
 export default class Home extends Component {
 
@@ -19,25 +18,13 @@ export default class Home extends Component {
       skills: this._skillOptions
     };
 
-    this.logChange = this.logChange.bind(this);
-    this.filterDeveloperComponent = this.filterDeveloperComponent.bind(this);
-    console.log("Country: " + this.props.country);
-  }
+    this.props.getDeveloperListAsync();
 
-  logChange(val) {
-    console.log("Selected: ");
-    // console.log(this.state.countries);
-    // console.log(val);
-    console.log(val.target.value);
+    this.filterDeveloperComponent = this.filterDeveloperComponent.bind(this);
   }
 
   filterDeveloperComponent() {
-    startCrawling()
     this.props.filterDeveloper(this.props.country, this.props.skill)
-  }
-
-  startCrawling() {
-    startCrawling()
   }
 
   render() {
@@ -72,7 +59,7 @@ export default class Home extends Component {
             bsStyle="primary" 
             bsSize="small" 
             className={styles.crawlingButton}
-            onClick={this.filterDeveloperComponent}
+            onClick={this.props.onCrawlingClick}
           >
             Start Crawling
           </Button>

@@ -14,7 +14,6 @@
 "use strict";
 
 import { Link } from 'react-router';
-var FakeObjectDataListStore = require('./FakeObjectDataListStore');
 var FixedDataTable = require('fixed-data-table');
 var React = require('react');
 import SortHeaderCell from './SortHeaderCell';

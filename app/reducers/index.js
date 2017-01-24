@@ -6,6 +6,7 @@ import skill from './skill';
 import developerList from './developerList';
 import repoList from './repoList';
 import developer from './developer';
+import commentList from './commentList';
 
 const rootReducer = combineReducers({
   country,
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   developerList,
   repoList,
   developer,
+  commentList,
   routing
 });
 

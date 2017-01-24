@@ -1,9 +1,13 @@
 // @flow
 import { FILTER_DEVELOPER } from '../actions/filter';
 import { SORT_DEVELOPER } from '../actions/sort';
+import { STORE_DEVELOPER_LIST } from '../actions/get';
 
-export default (state = developerList, action: {}) => {
+export default (state = [], action: {}) => {
   switch (action.type) {
+    case STORE_DEVELOPER_LIST:
+        return action.developerList
+
     case FILTER_DEVELOPER:
         var newState = []
         for (var i = 0; i < state.length; i++) {

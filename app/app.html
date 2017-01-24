@@ -26,15 +26,15 @@
 
     <div id="root"></div>
     <script>
-      // {
-      //   const script = document.createElement('script');
-      //   const port = process.env.PORT || 3000;
-      //   script.src = (process.env.HOT)
-      //     ? 'http://localhost:' + port + '/dist/bundle.js'
-      //     : './dist/bundle.js';
-      //   // HACK: Writing the script path should be done with webpack
-      //   document.body.appendChild(script);
-      // }
+      {
+        const script = document.createElement('script');
+        const port = process.env.PORT || 3000;
+        script.src = (process.env.HOT)
+          ? 'http://localhost:' + port + '/dist/bundle.js'
+          : './dist/bundle.js';
+        // HACK: Writing the script path should be done with webpack
+        document.body.appendChild(script);
+      }
     </script>
   </body>
 </html>

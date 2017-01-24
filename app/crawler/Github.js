@@ -19,7 +19,7 @@ module.exports = class Github {
       }
     }
 
-    this.browser = {} //webdriverio.remote(options).init()
+    this.browser = webdriverio.remote(options).init()
     this.developerModel = new GithubDeveloper()
     this.repoModel = new GithubDeveloperRepo()
   }
