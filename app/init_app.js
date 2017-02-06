@@ -25,11 +25,11 @@ function getModel(name) {
 // var Qiita = require('./crawler/Qiita')
 // const qiita = new Qiita()
 
-// var Facebook = require('./crawler/Facebook')
-// const facebook = new Facebook()
+var Facebook = require('./crawler/Facebook')
+const facebook = new Facebook()
 
 function crawlDeveloper(url, type) {
-  // console.log('===== startCrawling =====')
+  console.log('===== crawlDeveloper =====', url, type)
   // qiita.getSeedURLs(url, function (data, error) {
   //   if (error != null) {
   //     console.log(error)
@@ -37,7 +37,7 @@ function crawlDeveloper(url, type) {
   //   }
   // })
 
-  facebook.getPeronalInformation('https://m.facebook.com/suinyeze/about')
+  // facebook.getPeronalInformation('https://m.facebook.com/suinyeze/about')
   // facebook.getPeronalInformation('https://m.facebook.com/bobo.pipi.1/about')
 }
 

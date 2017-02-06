@@ -154,9 +154,9 @@ export function getFacebookJobAsync(userName) {
     };
 }
 
-export function onCrawlingClick() {
+export function onDeveloperListCrawlerClick(url, type) {
     return (dispatch: Function, getState: Function) => {
-        crawlDeveloper()
+        crawlDeveloper(url, type)
     };
 }
 

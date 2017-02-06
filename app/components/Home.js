@@ -21,6 +21,26 @@ export default class Home extends Component {
     this.props.getDeveloperListAsync();
 
     this.filterDeveloperComponent = this.filterDeveloperComponent.bind(this);
+    this.onDeveloperListUrlChange = this.onDeveloperListUrlChange.bind(this);
+    this.onDeveloperListUrlTypeChange = this.onDeveloperListUrlTypeChange.bind(this);
+    this.onDeveloperListCrawlerClick = this.onDeveloperListCrawlerClick.bind(this);
+
+    this.developerListUrl = ''
+    this.developerListUrlType = ''
+  }
+
+  onDeveloperListUrlChange(evt) {
+    console.log(evt.target.value)
+    this.developerListUrl = evt.target.value
+  }
+
+  onDeveloperListUrlTypeChange(evt) {
+    console.log(evt.target.value)
+    this.developerListUrlType = evt.target.value
+  }
+
+  onDeveloperListCrawlerClick() {
+    this.props.onDeveloperListCrawlerClick(this.developerListUrl, this.developerListUrlType)
   }
 
   filterDeveloperComponent() {
@@ -55,7 +75,7 @@ export default class Home extends Component {
                 bsStyle="primary" 
                 bsSize="small" 
                 className={styles.crawlingButton}
-                onClick={this.props.onCrawlingClick}
+                onClick={this.onDeveloperListCrawlerClick}
               >
                 Crawling Developer
               </Button>
@@ -72,12 +92,18 @@ export default class Home extends Component {
               <FormControl 
                 componentClass="select" 
                 className={styles.selectPage}
+                onChange={this.onDeveloperListUrlTypeChange}
               >
                 <option value='github' key='github' >github</option>
                 <option value='qiita' key='qiita' >qiita</option>
               </FormControl>
 
-              <FormControl type="text" placeholder="Url to get developer list" className={styles.seedUrlBox}/>
+              <FormControl 
+                type="text" 
+                placeholder="Url to get developer list" 
+                className={styles.seedUrlBox}
+                onChange={this.onDeveloperListUrlChange}
+              />
             </FormGroup>
           </div>
 
