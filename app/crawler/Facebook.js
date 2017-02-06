@@ -14,7 +14,7 @@ module.exports = class Facebook {
       desiredCapabilities: {
         browserName: 'chrome',
         chromeOptions: {
-          binary: '../jobsearchapp/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron', // Path to your Electron binary.
+          binary: './node_modules/electron/dist/Electron.app/Contents/MacOS/Electron', // Path to your Electron binary.
           args: [/* cli arguments */]           // Optional, perhaps 'app=' + /path/to/your/app/
         }
       }
