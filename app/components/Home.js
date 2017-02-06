@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router';
 import styles from './Home.css';
 import SortTable from './SortTable'
-import { Button, FormControl } from 'react-bootstrap';
+import { Button, FormControl, FormGroup, ControlLabel } from 'react-bootstrap';
 
 export default class Home extends Component {
 
@@ -49,50 +49,69 @@ export default class Home extends Component {
     return (
       <div>
         <div className={styles.container}>
-          <h2>Job Search Crawler</h2>
-          <hr/>
+          <div className={styles.crawlerArea}>
+            <FormGroup>
+              <Button 
+                bsStyle="primary" 
+                bsSize="small" 
+                className={styles.crawlingButton}
+                onClick={this.props.onCrawlingClick}
+              >
+                Crawling Developer
+              </Button>
+
+              <Button 
+                bsStyle="primary" 
+                bsSize="small" 
+                className={styles.crawlingDeveloperInfo}
+                onClick={this.props.onCrawlDeveloperInfoClick}
+              >
+                Crawling Developer Info
+              </Button>
+
+              <FormControl 
+                componentClass="select" 
+                className={styles.selectPage}
+              >
+                <option value='github' key='github' >github</option>
+                <option value='qiita' key='qiita' >qiita</option>
+              </FormControl>
+
+              <FormControl type="text" placeholder="Url to get developer list" className={styles.seedUrlBox}/>
+            </FormGroup>
+          </div>
+
 
           <br/>
-          <br/>
+          <div className={styles.filterArea}>
+            <Button 
+              bsStyle="primary" 
+              bsSize="small" 
+              className={styles.filterButton}
+              onClick={this.filterDeveloperComponent}
+            >
+              Filter
+            </Button>
 
-          <Button 
-            bsStyle="primary" 
-            bsSize="small" 
-            className={styles.crawlingButton}
-            onClick={this.props.onCrawlingClick}
-          >
-            Start Crawling
-          </Button>
+            <FormControl 
+              componentClass="select" 
+              placeholder="Skills" 
+              className={styles.selectSkill} 
+              onChange={this.props.changeSkill}
+            >
+              {skillOptionList}
+            </FormControl>
 
-          <Button 
-            bsStyle="primary" 
-            bsSize="small" 
-            className={styles.filterButton}
-            onClick={this.filterDeveloperComponent}
-          >
-            Filter
-          </Button>
-
-          <FormControl 
-            componentClass="select" 
-            placeholder="Skills" 
-            className={styles.selectSkill} 
-            onChange={this.props.changeSkill}
-          >
-            {skillOptionList}
-          </FormControl>
-
-          <FormControl 
-            componentClass="select" 
-            placeholder="Skills" 
-            className={styles.selectCountry} 
-            onChange={this.props.changeCountry}
-          >
-            {countryOptionList}
-          </FormControl>
-
-          <br/>
-          <br/>
+            <FormControl 
+              componentClass="select" 
+              placeholder="Skills" 
+              className={styles.selectCountry} 
+              onChange={this.props.changeCountry}
+            >
+              {countryOptionList}
+            </FormControl>
+          </div>
+          
           <SortTable 
             dataList={this.props.developerList}
             columns={columns}

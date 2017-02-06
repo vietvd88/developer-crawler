@@ -7,6 +7,8 @@ import developerList from './developerList';
 import repoList from './repoList';
 import developer from './developer';
 import commentList from './commentList';
+import qiitaPostList from './qiitaPostList';
+import facebookJobList from './facebookJobList';
 
 const rootReducer = combineReducers({
   country,
@@ -15,6 +17,8 @@ const rootReducer = combineReducers({
   repoList,
   developer,
   commentList,
+  qiitaPostList,
+  facebookJobList,
   routing
 });
 

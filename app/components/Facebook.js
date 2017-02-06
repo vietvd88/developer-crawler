@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 import { Link } from 'react-router';
-import styles from './Qiita.css';
+import styles from './Facebook.css';
 import SortTable from './SortTable'
 import { Button, FormControl, FormGroup, ControlLabel } from 'react-bootstrap';
 
@@ -11,8 +11,8 @@ export default class Home extends Component {
     super(props);
 
     var queryString = this.props.location.query
-    this.props.getQiitaDeveloperAsync(queryString.user)
-    this.props.getQittaPostAsync(queryString.user)
+    this.props.getFacebookDeveloperAsync(queryString.user)
+    this.props.getFacebookJobAsync(queryString.user)
 
     this.onChange = this.onChange.bind(this);
     this.postComment = this.postComment.bind(this);
@@ -31,9 +31,9 @@ export default class Home extends Component {
 
   render() {
     const columns = [
-        {name: 'Title', key: 'title', width: 200},
-        {name: 'Like', key: 'like', width: 200},
-        {name: 'Comment', key: 'comment', width: 200},
+        {name: 'Company', key: 'company', width: 200},
+        {name: 'Position', key: 'position', width: 200},
+        {name: 'Duration', key: 'duration', width: 200},
     ];
 
     var comments = this.props.commentList.map(function(comment) { return comment.comment })
@@ -56,9 +56,9 @@ export default class Home extends Component {
 
           <div className={styles.repoTable}>
             <SortTable 
-              dataList={this.props.qiitaPostList} 
+              dataList={this.props.facebookJobList} 
               columns={columns}
-              onSortChange={this.props.sortQiitaPost}
+              onSortChange={this.props.sortFacebookJob}
               width={800}
               height={200}
             />

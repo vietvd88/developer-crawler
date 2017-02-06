@@ -1,0 +1,44 @@
+.container {
+  position: absolute;
+  left: 10px;
+  /*text-align: center;*/
+}
+
+.container h2 {
+  font-size: 3rem;
+}
+.avatar {
+    width: 60px;
+    height: 60px;
+}
+
+.userName {
+  margin-left: 10px;
+  font-size: 2rem;
+}
+
+.userPanel {
+  margin-bottom: 10px;
+}
+
+.repoTable {
+  margin-bottom: 10px;
+}
+
+.email {
+  font-size: 2rem;
+}
+
+.phone {
+  font-size: 2rem;
+}
+
+textarea .form-control {
+  height: 150px;
+}
+
+textarea{ line-height: 120%; }
+
+.comments {
+  height: 200px;
+}

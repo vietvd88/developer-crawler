@@ -1,6 +1,7 @@
 const webdriverio = require('webdriverio')
-var GithubDeveloper = require('../model/GithubDeveloper')
-var GithubDeveloperRepo = require('../model/GithubDeveloperRepo')
+var FacebookDeveloper = require('../model/FacebookDeveloper')
+var FacebookDeveloperJob = require('../model/FacebookDeveloperJob')
+var FacebookDeveloperEducation = require('../model/FacebookDeveloperEducation')
 
 module.exports = class Facebook {
   constructor(url) {
@@ -20,8 +21,9 @@ module.exports = class Facebook {
     }
 
     this.browser = webdriverio.remote(options).init()
-    this.developerModel = new GithubDeveloper()
-    this.repoModel = new GithubDeveloperRepo()
+    this.developerModel = new FacebookDeveloper()
+    this.jobModel = new FacebookDeveloperJob()
+    this.educationModel = new FacebookDeveloperEducation()
   }
 
   getSeedURLs(url, callback) {
@@ -52,7 +54,8 @@ module.exports = class Facebook {
   getPeronalInformation(url) {
     this.getDeveloperInfo(url, (developerInfo, error) => {
         console.log(developerInfo)
-        // this.getPosts(url)
+        this.getEducation(url)
+        this.getJob(url)
     })
   }
 
@@ -65,25 +68,31 @@ module.exports = class Facebook {
     
     browser
     .url(url)
-    // .getAttribute('#contact-info tbody a', 'src').then((response) => {
-    //     developerInfo.avatar = response;
-    // })
+    .element('.bu').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'user_name')
+    })
+    .element('.bu').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'name')
+    })
+    .getAttribute('.bp a img', 'src').then((response) => {
+        developerInfo.avatar = response;
+    })
     .element('#contact-info tbody a').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'website')
     })
-    // .element('.newUserPageProfile_description').then((response) => {
-    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'description')
-    // })
-    // .element('a[itemprop="email"]').then((response) => {
-    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'email')
-    // })
-    // .element('a[itemprop="url"]').then((response) => {
-    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'email')
-    // })
+    .element('#basic-info div[title="Birthday"] .ds').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'birthday')
+    })
+    .element('#living div[title="Current City"] .ds').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'location')
+    })
+    .element('#living div[title="Hometown"] .ds').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'hometown')
+    })
     .then(function () {
       // console.log(developerInfo)
-        // var condition = {user_name: developerInfo.user_name}
-        // developerModel.update(condition, developerInfo)
+        var condition = {user_name: developerInfo.user_name}
+        developerModel.update(condition, developerInfo)
         callback(developerInfo, null)
     })
     .catch(function (error) {
@@ -92,29 +101,24 @@ module.exports = class Facebook {
     })
   }
 
-  getPosts(url) {
+  getEducation(url) {
     var crawler = this
     var browser = this.browser
-    var nextPostPageCallback = () => {
-        this.getNextPostPage(
-            (url) => { this.getPosts(url) }
-        )
-    }
 
     browser
     .url(url)
-    .elements('.tableList article').then((response) => {
-      crawler.getPostInfo(browser, 0, response.value, nextPostPageCallback)
+    .elements('#education .da').then((response) => {
+      crawler.getEducationInfo(browser, 0, response.value)
     })
     .catch(function(e) {
         console.log(e)
     })
   }
 
-  getPostInfo(browser, index, elemIdList, callback) {
+  getEducationInfo(browser, index, elemIdList, callback) {
     callback = callback || function () {}
-    var repoModel = this.repoModel
-    var repoInfo = {}
+    var educationModel = this.educationModel
+    var educationInfo = {}
     var crawler = this
     var browser = this.browser
     if (index >= elemIdList.length) {
@@ -122,86 +126,77 @@ module.exports = class Facebook {
         return
     }
     var elemId = elemIdList[index].ELEMENT
-      browser
-      .elementIdElement(elemId, '.ItemLink__info a').then((response) => {
-        return crawler.getElemTextByElemResponse(browser, response, repoInfo, 'user_name')
-      })
-      .elementIdElement(elemId, '.ItemLink__title a').then((response) => {
-        return crawler.getElemTextByElemResponse(browser, response, repoInfo, 'title')
-      })
-      .elementIdElement(elemId, '.ItemLink__status li').then((response) => {
-        return crawler.getElemTextByElemResponse(browser, response, repoInfo, 'like')
-      })
-      .elementIdElement(elemId, '.ItemLink__status li a').then((response) => {
-        return crawler.getElemTextByElemResponse(browser, response, repoInfo, 'comment')
-      })
-      // .elementIdElement(elemId, 'span[itemprop="programmingLanguage"]').then((response) => {
-      //   return crawler.getElemTextByElemResponse(browser, response, repoInfo, 'language')
-      // })
-      // .elementIdElement(elemId, 'a[aria-label="Stargazers"]').then((response) => {
-      //   return crawler.getElemTextByElemResponse(browser, response, repoInfo, 'star')
-      // })
-      .catch(function(e) {
-        console.log(e)
-        // callback(null, e)
-      })
-      .then((response) => {
-        console.log(repoInfo)
-        // var condition = {user_name: repoInfo.user_name, repo_name: repoInfo.repo_name}
-        // repoModel.update(condition, repoInfo)
-        this.getPostInfo(browser, index + 1, elemIdList, callback)
-      })
-    }
-
-  getNextPostPage(nextPageCallback, endPageCallback, prevData) {
-    this.getNextPage('a[rel="next"]', nextPageCallback, endPageCallback, prevData)
+    browser
+    .element('.bu').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, educationInfo, 'user_name')
+    })
+    .elementIdElement(elemId, '.di').then((response) => {
+      return crawler.getElemTextByElemResponse(browser, response, educationInfo, 'college')
+    })
+    .elementIdElement(elemId, '.dk').then((response) => {
+      return crawler.getElemTextByElemResponse(browser, response, educationInfo, 'grade')
+    })
+    .elementIdElement(elemId, '.dl').then((response) => {
+      return crawler.getElemTextByElemResponse(browser, response, educationInfo, 'duration')
+    })
+    .catch(function(e) {
+      console.log(e)
+      // callback(null, e)
+    })
+    .then((response) => {
+      var condition = {user_name: educationInfo.user_name, college: educationInfo.college}
+      educationModel.update(condition, educationInfo)
+      this.getEducationInfo(browser, index + 1, elemIdList, callback)
+    })
   }
 
-  getNextPage(selector, nextPageCallback, endPageCallback, prevData) {
-    nextPageCallback = nextPageCallback || function () {};
-    endPageCallback = endPageCallback || function () {};
-
-    var developerModel = this.developerModel
-    var developerInfo = {}
+  getJob(url) {
     var crawler = this
-    var elemId
+    var browser = this.browser
 
-    this.browser
-    .elements('.pagination').then((response) => {
-        var hasPage = response && response.value && response.value.length > 0
-        if (!hasPage) {
-            endPageCallback(prevData, null)
-            return
-        }
-        elemId = response.value[0].ELEMENT
-        this.browser.elementIdElement(elemId, selector).then((response) => {
-            if (response && response.value) {
-                elemId = response.value.ELEMENT
-                this.browser.elementIdAttribute(elemId, 'href').then((response) => {
-                    if (response && response.value) {
-                        var nextUrl = response.value 
-                        console.log('next page: ' + nextUrl)
-                        nextPageCallback(nextUrl, endPageCallback)
-                    } else {
-                        console.log('endPageCallback: ', endPageCallback)
-                        endPageCallback(prevData, null)
-                    }
-                })
-            } else {
-                console.log('endPageCallback: ', endPageCallback)
-                endPageCallback(prevData, null)
-            }
-        })
-        .catch(function(reason) {
-            console.log(reason)
-            console.log('endPageCallback: ', endPageCallback)
-            endPageCallback(null, reason)
-        });
+    browser
+    .url(url)
+    .elements('#work .cw .da').then((response) => {
+      crawler.getJobInfo(browser, 0, response.value)
     })
-    .catch(function(reason) {
-        console.log(reason)
-        endPageCallback(null, reason)
-    });
+    .catch(function(e) {
+        console.log(e)
+    })
+  }
+
+  getJobInfo(browser, index, elemIdList, callback) {
+    callback = callback || function () {}
+    var jobModel = this.jobModel
+    var jobInfo = {}
+    var crawler = this
+    var browser = this.browser
+    if (index >= elemIdList.length) {
+        callback()
+        return
+    }
+    var elemId = elemIdList[index].ELEMENT
+    browser
+    .element('.bu').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, jobInfo, 'user_name')
+    })
+    .elementIdElement(elemId, '.db').then((response) => {
+      return crawler.getElemTextByElemResponse(browser, response, jobInfo, 'company')
+    })
+    .elementIdElement(elemId, '.df').then((response) => {
+      return crawler.getElemTextByElemResponse(browser, response, jobInfo, 'position')
+    })
+    .elementIdElement(elemId, '.dg').then((response) => {
+      return crawler.getElemTextByElemResponse(browser, response, jobInfo, 'duration')
+    })
+    .catch(function(e) {
+      console.log(e)
+      // callback(null, e)
+    })
+    .then((response) => {
+      var condition = {user_name: jobInfo.user_name, company: jobInfo.company, duration: jobInfo.duration}
+      jobModel.update(condition, jobInfo)
+      this.getJobInfo(browser, index + 1, elemIdList, callback)
+    })
   }
 
   getElemTextByElemResponse(browser, elemResponse, infoObj, attribute) {

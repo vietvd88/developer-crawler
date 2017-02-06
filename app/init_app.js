@@ -2,6 +2,12 @@ var Github = require('./crawler/Github')
 var GithubDeveloper = require('./model/GithubDeveloper')
 var GithubDeveloperRepo = require('./model/GithubDeveloperRepo')
 var GithubDeveloperComment = require('./model/GithubDeveloperComment')
+var DeveloperUrlQueue = require('./model/DeveloperUrlQueue')
+var FacebookDeveloper = require('./model/FacebookDeveloper')
+var FacebookDeveloperJob = require('./model/FacebookDeveloperJob')
+var FacebookDeveloperEducation = require('./model/FacebookDeveloperEducation')
+var QiitaDeveloper = require('./model/QiitaDeveloper')
+var QiitaDeveloperPost = require('./model/QiitaDeveloperPost')
 var models = {}
 
 function getModel(name) {
@@ -19,31 +25,45 @@ function getModel(name) {
 // var Qiita = require('./crawler/Qiita')
 // const qiita = new Qiita()
 
-var Facebook = require('./crawler/Facebook')
-const facebook = new Facebook()
+// var Facebook = require('./crawler/Facebook')
+// const facebook = new Facebook()
 
-function startCrawling() {
-  // var url = 'http://qiita.com/tags/PHP/likes';
+function crawlDeveloper(url, type) {
+  // console.log('===== startCrawling =====')
   // qiita.getSeedURLs(url, function (data, error) {
   //   if (error != null) {
   //     console.log(error)
   //     return
   //   }
-  //   console.log(data)
-  //   if (data && data.length > 0) {
-  //     for (var i = 0; i < data.length; i++) {
-  //       var url = data[i]
-  //       setTimeout((function(url){
-  //         return () => {
-  //           console.log('get develep info: ' + url);
-  //           github.getPeronalInformation(url)
-  //         }
-  //       })(url), 60000 * (i+1));
-  //     }
-  //   }
   // })
 
-  facebook.getPeronalInformation('https://m.facebook.com/suinyeze')
+  facebook.getPeronalInformation('https://m.facebook.com/suinyeze/about')
+  // facebook.getPeronalInformation('https://m.facebook.com/bobo.pipi.1/about')
+}
+
+function crawlDeveloperInfo() {
+  console.log('===== crawlDeveloperInfo =====')
+  var queueModel = getModel('DeveloperUrlQueue')
+  queueModel.getAll().then(data => {
+    console.log(data)
+    if (data && data.length > 0) {
+      for (var i = 0; i < data.length; i++) {
+        var url = data[i].url
+        var type = data[i].type
+        console.log(url, type)
+        var crawler = facebook
+        if (type == 'qiita') {
+          crawler = qiita
+        }
+        setTimeout((function(url){
+          return () => {
+            console.log('get develep info: ' + url);
+            crawler.getPeronalInformation(url)
+          }
+        })(url), 30000 * (i+1));
+      }
+    }
+  })
 }
 
 

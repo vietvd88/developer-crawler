@@ -1,6 +1,6 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import Qiita from '../components/Qiita';
+import Facebook from '../components/Facebook';
 import * as Sorters from '../actions/sort';
 import * as Getters from '../actions/get';
 import * as Comments from '../actions/comment';
@@ -8,7 +8,7 @@ import * as Comments from '../actions/comment';
 function mapStateToProps(state) {
   return {
     developer: state.developer,
-    qiitaPostList: state.qiitaPostList,
+    facebookJobList: state.facebookJobList,
     commentList: state.commentList,
   };
 }
@@ -17,4 +17,4 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(Object.assign({}, Sorters, Getters, Comments), dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Qiita);
+export default connect(mapStateToProps, mapDispatchToProps)(Facebook);

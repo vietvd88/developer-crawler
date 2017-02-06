@@ -1,6 +1,7 @@
 const webdriverio = require('webdriverio')
 var QiitaDeveloper = require('../model/QiitaDeveloper')
 var QiitaDeveloperPost = require('../model/QiitaDeveloperPost')
+var DeveloperUrlQueue = require('../model/DeveloperUrlQueue')
 
 module.exports = class Qiita {
   constructor(url) {
@@ -22,10 +23,12 @@ module.exports = class Qiita {
     this.browser = webdriverio.remote(options).init()
     this.developerModel = new QiitaDeveloper()
     this.postModel = new QiitaDeveloperPost()
+    this.urlQueue = new DeveloperUrlQueue()
   }
 
   getSeedURLs(url, callback) {
     console.log('getSeedURLs')
+    var urlQueue = this.urlQueue
     // callback = callback || function () {};
     // var elemId
     this.browser
@@ -36,9 +39,17 @@ module.exports = class Qiita {
         if (Array.isArray(names)) {
             for (var i = names.length - 1; i >= 0; i--) {
                 this.seedUrls.push('http://qiita.com/' + names[i])
+              urlQueue.insert({
+                url: 'http://qiita.com/' + names[i],
+                type: 'qiita'
+              })
             }
         } else {
             this.seedUrls.push('http://qiita.com/' + names)
+            urlQueue.insert({
+              url: 'http://qiita.com/' + names,
+              type: 'qiita'
+            })
         }
         
         this.getNextPostPage((url, callback) => { this.getSeedURLs(url, callback) }, callback, this.seedUrls)
@@ -50,15 +61,20 @@ module.exports = class Qiita {
   }
 
   getPeronalInformation(url) {
+    var urlQueue = this.urlQueue
     this.getDeveloperInfo(url, (developerInfo, error) => {
         console.log(developerInfo)
         this.getPosts(url)
+        urlQueue.delete({
+          url: url
+        })
     })
   }
 
   getDeveloperInfo(url, callback) {
     console.log('get develep info: ' + url)
     var developerModel = this.developerModel
+    var urlQueue = this.urlQueue
     var developerInfo = {}
     var crawler = this
     var browser = this.browser
@@ -68,8 +84,22 @@ module.exports = class Qiita {
     .getAttribute('.newUserPageProfile_avatar img', 'src').then((response) => {
         developerInfo.avatar = response;
     })
+    .getAttribute('.newUserPageProfile_socialLink-facebook a', 'href').then((response) => {
+      console.log('facebook link: ', response)
+      if (response && response != null && response != undefined) {
+        response = response.replace(/facebook/g , "m.facebook")
+        response = response + "/about"
+        urlQueue.insert({
+          url: response,
+          type: 'facebook'
+        })
+      }
+    })
     .element('.newUserPageProfile_name').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'user_name')
+    })
+    .element('.newUserPageProfile_name').then((response) => {
+        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'name')
     })
     .element('.newUserPageProfile_description').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'description')
@@ -81,10 +111,12 @@ module.exports = class Qiita {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'website')
     })
     .then(function () {
-      // console.log(developerInfo)
-        var condition = {user_name: developerInfo.user_name}
-        developerModel.update(condition, developerInfo)
-        callback(developerInfo, null)
+      developerInfo.post = 0
+      developerInfo.contribution = 0
+      developerInfo.follower = 0
+      var condition = {user_name: developerInfo.user_name}
+      developerModel.update(condition, developerInfo)
+      callback(developerInfo, null)
     })
     .catch(function (error) {
         console.log(error)
@@ -140,6 +172,7 @@ module.exports = class Qiita {
         callback(null, e)
       })
       .then((response) => {
+        postInfo.tags = ''
         console.log(postInfo)
         var condition = {user_name: postInfo.user_name, title: postInfo.title}
         postModel.update(condition, postInfo)

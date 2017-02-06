@@ -30,7 +30,7 @@ function reverseSortDirection(sortDir) {
 
 const TextCell = ({rowIndex, data, columnKey, ...props}) => (
   <Cell {...props}>
-    <Link to={{ pathname: '/github', query: { user: data[rowIndex]['user_name']} }}>
+    <Link to={{ pathname: '/facebook', query: { user: data[rowIndex]['user_name']} }}>
       {data[rowIndex][columnKey]}
     </Link>
   </Cell>

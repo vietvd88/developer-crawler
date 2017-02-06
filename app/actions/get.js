@@ -1,6 +1,8 @@
 export const STORE_REPOS = 'STORE_REPOS';
 export const STORE_DEVELOPER = 'STORE_DEVELOPER';
 export const STORE_DEVELOPER_LIST = 'STORE_DEVELOPER_LIST';
+export const STORE_QIITA_POST_LIST = 'STORE_QIITA_POST_LIST';
+export const STORE_FACEBOOK_JOB_LIST = 'STORE_FACEBOOK_JOB_LIST';
 
 export function storeRepos(repos) {
     return {
@@ -23,6 +25,20 @@ export function storeDeveloperList(developerList) {
     };
 }
 
+export function storeQiitaPostList(qiitaPostList) {
+    return {
+        type: STORE_QIITA_POST_LIST,
+        qiitaPostList,
+    };
+}
+
+export function storeFacebookJobList(facebookJobList) {
+    return {
+        type: STORE_FACEBOOK_JOB_LIST,
+        facebookJobList,
+    };
+}
+
 export function getDeveloperAsync(userName) {
     return (dispatch: Function, getState: Function) => {
         var developerModel = getModel('GithubDeveloper')
@@ -37,14 +53,29 @@ export function getDeveloperAsync(userName) {
 export function getDeveloperListAsync(userName) {
     return (dispatch: Function, getState: Function) => {
         var developerModel = getModel('GithubDeveloper')
+        var fbDeveloperModel = getModel('FacebookDeveloper')
+        var qiitaDeveloperModel = getModel('QiitaDeveloper')
         var repoModel = getModel('GithubDeveloperRepo')
         return Promise.all([
           developerModel.getAll(),
+          fbDeveloperModel.getAll(),
+          qiitaDeveloperModel.getAll(),
           repoModel.getAll()])
         .then(values => {
-          var developers, repos
-          [developers, repos] = values
-          developers = developers.filter(function(developer) { return developer.user_name != ''})
+          var developers, githubDevelopers, fbDevelopers, qiitaDevelopers, repos
+          [githubDevelopers, fbDevelopers, qiitaDevelopers, repos] = values
+          githubDevelopers = githubDevelopers.filter(function(developer) { return developer.user_name != ''})
+          fbDevelopers = fbDevelopers.filter(function(developer) { return developer.user_name != ''})
+          qiitaDevelopers = qiitaDevelopers.filter(function(developer) { return developer.user_name != ''})
+
+          // console.log('fbDevelopers', fbDevelopers)
+          developers = []
+          developers = developers.concat(fbDevelopers)
+          // developers = developers.concat(githubDevelopers)
+          // console.log('developers', developers)
+          // developers = developers.concat(fbDevelopers)
+          // console.log('developers', developers)
+
           for (var i = 0; i < developers.length; i++) {
             var developer = developers[i]
             var developerUserName = developer.user_name
@@ -80,9 +111,57 @@ export function getRepoAsync(userName) {
     };
 }
 
-export function onCrawlingClick() {
+export function getQiitaDeveloperAsync(userName) {
     return (dispatch: Function, getState: Function) => {
-        startCrawling()
+        var developerModel = getModel('QiitaDeveloper')
+        developerModel.get([], {user_name: userName}).then(developer => {
+            if (developer && developer.length > 0) {
+                dispatch(storeDeveloper(developer[0]))
+            }
+        })
     };
 }
 
+export function getQittaPostAsync(userName) {
+    console.log('getQittaPostAsync userName: ', userName)
+    userName = userName.replace(/@/g , "")
+    console.log('getQittaPostAsync userName2 2: ', userName)
+    return (dispatch: Function, getState: Function) => {
+        var postModel = getModel('QiitaDeveloperPost')
+        postModel.get([], {user_name: userName}).then(posts => {
+            dispatch(storeQiitaPostList(posts))
+        })
+    };
+}
+
+export function getFacebookDeveloperAsync(userName) {
+    return (dispatch: Function, getState: Function) => {
+        var developerModel = getModel('FacebookDeveloper')
+        developerModel.get([], {user_name: userName}).then(developer => {
+            if (developer && developer.length > 0) {
+                dispatch(storeDeveloper(developer[0]))
+            }
+        })
+    };
+}
+
+export function getFacebookJobAsync(userName) {
+    return (dispatch: Function, getState: Function) => {
+        var postModel = getModel('FacebookDeveloperJob')
+        postModel.get([], {user_name: userName}).then(jobs => {
+            dispatch(storeFacebookJobList(jobs))
+        })
+    };
+}
+
+export function onCrawlingClick() {
+    return (dispatch: Function, getState: Function) => {
+        crawlDeveloper()
+    };
+}
+
+export function onCrawlDeveloperInfoClick() {
+    return (dispatch: Function, getState: Function) => {
+        crawlDeveloperInfo()
+    };
+}

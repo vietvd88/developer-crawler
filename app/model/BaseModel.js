@@ -24,6 +24,15 @@ module.exports = class BaseModel {
         })
     }
 
+    delete(condition) {
+        DB(this.table).where(condition).del()
+        .then(function (result) {
+            console.log(result)
+        }, function (err) {
+            console.log(err)
+        })
+    }
+
     update(condition, data) {
         var model = this;
         DB(this.table)

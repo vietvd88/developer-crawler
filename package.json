@@ -23,7 +23,7 @@
     "package-win": "npm run build && build --win --x64",
     "package-linux": "npm run build && build --linux",
     "package-all": "npm run build && build -mwl",
-    "buid-db": "cross-env NODE_ENV=development node --max_old_space_size=2096 -r babel-register db.build.up.js",
+    "build-db": "cross-env NODE_ENV=development node --max_old_space_size=2096 -r babel-register db.build.up.js",
     "cleanup": "mop -v"
   },
   "build": {
