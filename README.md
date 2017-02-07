@@ -40,5 +40,12 @@ This is home page.
 ![url-queu-screen](https://raw.githubusercontent.com/vietvd88/developer-crawler/master/app/screenshots/url-queu-screen.png)  
 
 **2. Crawl developer detail**
--   When application starts, a hidden process will run each 30 seconds.
--   Each process will open a web browser window 
+-   When application starts, a hidden process will run each 30 seconds.  
+-   Each process will read a record of developer_url_queue table and open a web browser window to crawl developer informations  
+-   After finishing, web browser window will be closed automatically  
+-   Result: Eache process will insert developer informations into tables correspondingly  
+
+    -   for github: github_developer, github_developer_repo  
+    -   for qiita: qiita_developer, qiita_developer_post  
+    -   for facebook: facebook_developer, facebook_developer_job, facebook_developer_education  
+
