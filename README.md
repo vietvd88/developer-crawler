@@ -29,7 +29,7 @@ This is home page.
 
 -   Input a root url into the textbox next to "start crawling" 
     (ex: http://git-awards.com/users?utf8=%E2%9C%93&type=country&language=php&country=Vietnam)  
--   Select wright page type for the url (ex: github)   
+-   Select right page type for the url (ex: github)   
 -   Click on "Start Crawling" button
 
 ===> Ressult:
