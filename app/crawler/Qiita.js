@@ -9,6 +9,7 @@ module.exports = class Qiita {
     this.seedUrls = []
 
     this.browser = getBrowser()
+    this.browser.init()
     this.developerModel = new QiitaDeveloper()
     this.postModel = new QiitaDeveloperPost()
     this.urlQueue = new DeveloperUrlQueue()
@@ -51,11 +52,17 @@ module.exports = class Qiita {
   getPeronalInformation(url) {
     var urlQueue = this.urlQueue
     this.getDeveloperInfo(url, (developerInfo, error) => {
-        console.log(developerInfo)
-        this.getPosts(url)
-        urlQueue.delete({
-          url: url
-        })
+      console.log(developerInfo)
+      urlQueue.delete({
+        url: url
+      })
+
+      if (error != null) {
+        this.browser.end()
+        return
+      }
+
+      this.getPosts(url)
     })
   }
 
@@ -66,22 +73,26 @@ module.exports = class Qiita {
     var developerInfo = {}
     var crawler = this
     var browser = this.browser
-    
+    var links = {}
+
     browser
     .url(url)
     .getAttribute('.newUserPageProfile_avatar img', 'src').then((response) => {
         developerInfo.avatar = response;
     })
-    .getAttribute('.newUserPageProfile_socialLink-facebook a', 'href').then((response) => {
-      console.log('facebook link: ', response)
-      if (response && response != null && response != undefined) {
-        response = response.replace(/facebook/g , "m.facebook")
-        response = response + "/about"
-        urlQueue.insert({
-          url: response,
-          type: 'facebook'
-        })
-      }
+    // .getAttribute('.newUserPageProfile_socialLink-facebook a', 'href').then((response) => {
+    //   console.log('facebook link: ', response)
+    //   if (response && response != null && response != undefined) {
+    //     response = response.replace(/facebook/g , "m.facebook")
+    //     response = response + "/about"
+    //     urlQueue.insert({
+    //       url: response,
+    //       type: 'facebook'
+    //     })
+    //   }
+    // })
+    .element('.newUserPageProfile_socialLink-facebook a').then((response) => {
+        return crawler.getElemAttributeByElemResponse(browser, response, 'href', links, 'facebook')
     })
     .element('.newUserPageProfile_name').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'user_name')
@@ -99,6 +110,17 @@ module.exports = class Qiita {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'website')
     })
     .then(function () {
+      console.log('links: ', links)
+      var fbLink = links.facebook
+      if (fbLink && fbLink != null && fbLink != undefined) {
+        fbLink = fbLink.replace(/facebook/g , "m.facebook")
+        fbLink = fbLink + "/about"
+        urlQueue.insert({
+          url: fbLink,
+          type: 'facebook'
+        })
+      }
+
       developerInfo.post = 0
       developerInfo.contribution = 0
       developerInfo.follower = 0
@@ -185,53 +207,74 @@ module.exports = class Qiita {
     .elements('.pagination').then((response) => {
         var hasPage = response && response.value && response.value.length > 0
         if (!hasPage) {
-            endPageCallback(prevData, null)
-            return
+          this.browser.end()
+          endPageCallback(prevData, null)
+          return
         }
         elemId = response.value[0].ELEMENT
         this.browser.elementIdElement(elemId, selector).then((response) => {
             if (response && response.value) {
-                elemId = response.value.ELEMENT
-                this.browser.elementIdAttribute(elemId, 'href').then((response) => {
-                    if (response && response.value) {
-                        var nextUrl = response.value 
-                        console.log('next page: ' + nextUrl)
-                        nextPageCallback(nextUrl, endPageCallback)
-                    } else {
-                        console.log('endPageCallback: ', endPageCallback)
-                        endPageCallback(prevData, null)
-                    }
-                })
+              elemId = response.value.ELEMENT
+              this.browser.elementIdAttribute(elemId, 'href').then((response) => {
+                if (response && response.value) {
+                  var nextUrl = response.value 
+                  console.log('next page: ' + nextUrl)
+                  nextPageCallback(nextUrl, endPageCallback)
+                } else {
+                  console.log('endPageCallback: ', endPageCallback)
+                  this.browser.end()
+                  endPageCallback(prevData, null)
+                }
+              })
             } else {
-                console.log('endPageCallback: ', endPageCallback)
-                endPageCallback(prevData, null)
+              console.log('endPageCallback: ', endPageCallback)
+              this.browser.end()
+              endPageCallback(prevData, null)
             }
         })
         .catch(function(reason) {
             console.log(reason)
             console.log('endPageCallback: ', endPageCallback)
+            this.browser.end()
             endPageCallback(null, reason)
         });
     })
     .catch(function(reason) {
         console.log(reason)
+        this.browser.end()
         endPageCallback(null, reason)
     });
   }
 
   getElemTextByElemResponse(browser, elemResponse, infoObj, attribute) {
-        var crawler = this;
-        if (elemResponse && elemResponse.value) {
-          return crawler.getElemText(browser, elemResponse.value.ELEMENT, infoObj, attribute)  
-        }
-        infoObj[attribute] = ''
-        return browser;
+    if (elemResponse && elemResponse.value) {
+      return this.getElemText(browser, elemResponse.value.ELEMENT, infoObj, attribute)  
     }
-    getElemText(browser, elemId, repoInfo, attribute) {
-      return browser
-        .elementIdText(elemId).then((response) => {
-          repoInfo[attribute] = response.value
-          return response.value
-        })
+    infoObj[attribute] = ''
+    return browser;
+  }
+
+  getElemText(browser, elemId, infoObj, attribute) {
+    return browser
+      .elementIdText(elemId).then((response) => {
+        infoObj[attribute] = response.value
+        return response.value
+      })
+  }
+
+  getElemAttributeByElemResponse(browser, elemResponse, elemAttribute, infoObj, attribute) {
+    if (elemResponse && elemResponse.value) {
+      return this.getElemAttribute(browser, elemResponse.value.ELEMENT, elemAttribute, infoObj, attribute)  
     }
+    infoObj[attribute] = ''
+    return browser;
+  }
+
+  getElemAttribute(browser, elemId, elemAttribute, infoObj, attribute) {
+    return browser
+      .elementIdAttribute(elemId, elemAttribute).then((response) => {
+        infoObj[attribute] = response.value
+        return response.value
+      })
+  }
 }

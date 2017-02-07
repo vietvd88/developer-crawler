@@ -9,6 +9,7 @@ module.exports = class Facebook {
     this.seedUrls = []
 
     this.browser = getBrowser()
+    this.browser.init()
     this.developerModel = new FacebookDeveloper()
     this.jobModel = new FacebookDeveloperJob()
     this.educationModel = new FacebookDeveloperEducation()

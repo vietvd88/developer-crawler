@@ -80,3 +80,9 @@
 .filterArea {
   margin-bottom: 10px;
 }
+
+.errorMsg {
+  margin-top: 40px;
+  margin-bottom: 10px;
+  height: 36px;
+}

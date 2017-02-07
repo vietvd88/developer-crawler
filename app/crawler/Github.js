@@ -3,49 +3,15 @@ var GithubDeveloperRepo = require('../model/GithubDeveloperRepo')
 var DeveloperUrlQueue = require('../model/DeveloperUrlQueue')
 
 module.exports = class Github {
-  constructor(url) {
-    this.url = url
+  constructor(browser) {
     this.done = false
     this.seedUrls = []
 
-    this.browser = getBrowser()
+    this.browser = browser || getBrowser()
     this.developerModel = new GithubDeveloper()
     this.repoModel = new GithubDeveloperRepo()
     this.urlQueue = new DeveloperUrlQueue()
   }
-
-  getDeveloperList() {
-    return Promise.all([
-      this.developerModel.getAll(),
-      this.repoModel.getAll()])
-    .then(values => {
-      var developers, repos
-      [developers, repos] = values
-      developers = developers.filter(function(developer) { return developer.user_name != ''})
-      for (var i = 0; i < developers.length; i++) {
-        var developer = developers[i]
-        var developerUserName = developer.user_name
-        var developerRepos = repos.filter(function(repo) {return repo.user_name == developerUserName})
-        var developerSkills = developerRepos.map(function(repo) { return repo.language })
-        developerSkills = developerSkills.filter(function(item, pos) {
-            return developerSkills.indexOf(item) == pos && item !== '';
-        })
-        developer.skill = developerSkills.join(' ')
-        developer.age = 20
-        developer.score = 100
-      }
-      return developers
-    })
-  }
-
-  sleep(milliseconds) {
-      var start = new Date().getTime();
-      while (true) {
-        if ((new Date().getTime() - start) > milliseconds){
-          break;
-        }
-      }
-    }
 
   getSeedURLs(url, callback) {
     console.log('getSeedURLs')
@@ -53,6 +19,7 @@ module.exports = class Github {
     var urlQueue = this.urlQueue
     var elemId
     this.browser
+      .timeouts('implicit', 5000)
       .url(url)
       // get user name
       .getText('.username').then((names) => {
@@ -83,9 +50,18 @@ module.exports = class Github {
   }
 
   getPeronalInformation(url) {
+    var urlQueue = this.urlQueue
     this.getDeveloperInfo(url, (developerInfo, error) => {
-        console.log(developerInfo)
-        this.getRepos(url + '?tab=repositories')
+      urlQueue.delete({
+        url: url
+      })
+
+      if (error != null) {
+        this.browser.end()
+        return
+      }
+      console.log(developerInfo)
+      this.getRepos(url + '?tab=repositories')
     })
   }
 
@@ -129,17 +105,18 @@ module.exports = class Github {
     var browser = this.browser
     var nextRepoPageCallback = () => {
         this.getNextRepoPage(
-            (url) => { this.getRepos(url) }
+          (url) => { this.getRepos(url) }
         )
     }
 
     browser
     .url(url)
     .elements('#user-repositories-list li').then((response) => {
-        crawler.getRepoInfo(browser, 0, response.value, nextRepoPageCallback)
+      crawler.getRepoInfo(browser, 0, response.value, nextRepoPageCallback)
     })
     .catch(function(e) {
-        console.log(e)
+      browser.end()
+      console.log(e)
     })
   }
   
@@ -164,38 +141,43 @@ module.exports = class Github {
     .elements('.pagination').then((response) => {
         var hasPage = response && response.value && response.value.length > 0
         if (!hasPage) {
-            endPageCallback(prevData, null)
-            return
+          this.browser.end()
+          endPageCallback(prevData, null)
+          return
         }
         elemId = response.value[0].ELEMENT
         this.browser.elementIdElement(elemId, selector).then((response) => {
             if (response && response.value) {
-                elemId = response.value.ELEMENT
-                this.browser.elementIdAttribute(elemId, 'href').then((response) => {
-                    if (response && response.value) {
-                        var nextUrl = response.value 
-                        console.log('next page: ' + nextUrl)
-                        console.log('nextPageCallback: ', nextPageCallback)
-                        nextPageCallback(nextUrl, endPageCallback)
-                    } else {
-                        console.log('endPageCallback: ', endPageCallback)
-                        endPageCallback(prevData, null)
-                    }
-                })
+              elemId = response.value.ELEMENT
+              this.browser.elementIdAttribute(elemId, 'href').then((response) => {
+                  if (response && response.value) {
+                    var nextUrl = response.value 
+                    console.log('next page: ' + nextUrl)
+                    console.log('nextPageCallback: ', nextPageCallback)
+                    nextPageCallback(nextUrl, endPageCallback)
+                  } else {
+                    console.log('endPageCallback: ', endPageCallback)
+                    this.browser.end()
+                    endPageCallback(prevData, null)
+                  }
+              })
             } else {
-                console.log('endPageCallback: ', endPageCallback)
-                endPageCallback(prevData, null)
+              console.log('endPageCallback: ', endPageCallback)
+              this.browser.end()
+              endPageCallback(prevData, null)
             }
         })
         .catch(function(reason) {
-            console.log(reason)
-            console.log('endPageCallback: ', endPageCallback)
-            endPageCallback(null, reason)
+          console.log(reason)
+          console.log('endPageCallback: ', endPageCallback)
+          this.browser.end()
+          endPageCallback(null, reason)
         });
     })
     .catch(function(reason) {
-        console.log(reason)
-        endPageCallback(null, reason)
+      console.log(reason)
+      this.browser.end()
+      endPageCallback(null, reason)
     });
   }
 
@@ -242,12 +224,12 @@ module.exports = class Github {
     }
 
     getElemTextByElemResponse(browser, elemResponse, infoObj, attribute) {
-        var crawler = this;
-        if (elemResponse && elemResponse.value) {
-          return crawler.getElemText(browser, elemResponse.value.ELEMENT, infoObj, attribute)  
-        }
-        infoObj[attribute] = ''
-        return browser;
+      var crawler = this;
+      if (elemResponse && elemResponse.value) {
+        return crawler.getElemText(browser, elemResponse.value.ELEMENT, infoObj, attribute)  
+      }
+      infoObj[attribute] = ''
+      return browser;
     }
     getElemText(browser, elemId, repoInfo, attribute) {
       return browser

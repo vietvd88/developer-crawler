@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router';
 import styles from './Home.css';
 import SortTable from './SortTable'
-import { Button, FormControl, FormGroup, ControlLabel } from 'react-bootstrap';
+import { Button, FormControl, FormGroup, ControlLabel, Alert } from 'react-bootstrap';
 
 export default class Home extends Component {
 
@@ -18,15 +18,30 @@ export default class Home extends Component {
       skills: this._skillOptions
     };
 
-    this.props.getDeveloperListAsync();
+    this.props.getDeveloperListAsync()
 
-    this.filterDeveloperComponent = this.filterDeveloperComponent.bind(this);
-    this.onDeveloperListUrlChange = this.onDeveloperListUrlChange.bind(this);
-    this.onDeveloperListUrlTypeChange = this.onDeveloperListUrlTypeChange.bind(this);
-    this.onDeveloperListCrawlerClick = this.onDeveloperListCrawlerClick.bind(this);
+    this.filterDeveloperComponent = this.filterDeveloperComponent.bind(this)
+    this.onDeveloperListUrlChange = this.onDeveloperListUrlChange.bind(this)
+    this.onDeveloperListUrlTypeChange = this.onDeveloperListUrlTypeChange.bind(this)
+    this.onStartCrawling = this.onStartCrawling.bind(this)
+    this.setErrorMessage = this.setErrorMessage.bind(this)
+    this.handleErrorDismiss = this.handleErrorDismiss.bind(this)
 
     this.developerListUrl = ''
-    this.developerListUrlType = ''
+    this.developerListUrlType = 'github'
+    this.noticationMsg = ''
+    this.crawlingButtonText = 'Start crawling'
+
+    this.isCrawling = false
+  }
+
+  handleErrorDismiss() {
+    this.setState({hasError: false})
+  }
+
+  setErrorMessage(message) {
+    this.noticationMsg = message
+    this.setState({hasError: true})
   }
 
   onDeveloperListUrlChange(evt) {
@@ -39,8 +54,23 @@ export default class Home extends Component {
     this.developerListUrlType = evt.target.value
   }
 
-  onDeveloperListCrawlerClick() {
-    this.props.onDeveloperListCrawlerClick(this.developerListUrl, this.developerListUrlType)
+  onStartCrawling() {
+    if (this.developerListUrl == '') {
+      var message = 'Need to input url to get developer list on above box'
+      this.setErrorMessage(message)
+      return
+    }
+    
+    if (this.isCrawling) {
+      this.crawlingButtonText = 'Start Crawling'
+      this.props.stopCrawling()  
+    } else {
+      this.crawlingButtonText = 'Stop Crawling'
+      this.props.startCrawling(this.developerListUrl, this.developerListUrlType)
+    }
+    this.isCrawling = !this.isCrawling
+    this.setState({isCrawling: this.isCrawling})
+    this.handleErrorDismiss()
   }
 
   filterDeveloperComponent() {
@@ -75,18 +105,9 @@ export default class Home extends Component {
                 bsStyle="primary" 
                 bsSize="small" 
                 className={styles.crawlingButton}
-                onClick={this.onDeveloperListCrawlerClick}
+                onClick={this.onStartCrawling}
               >
-                Crawling Developer
-              </Button>
-
-              <Button 
-                bsStyle="primary" 
-                bsSize="small" 
-                className={styles.crawlingDeveloperInfo}
-                onClick={this.props.onCrawlDeveloperInfoClick}
-              >
-                Crawling Developer Info
+                {this.crawlingButtonText}
               </Button>
 
               <FormControl 
@@ -107,7 +128,16 @@ export default class Home extends Component {
             </FormGroup>
           </div>
 
-
+          {
+            this.state.hasError
+            ? <div className={styles.errorMsg}>
+                <Alert bsStyle="danger" onDismiss={this.handleErrorDismiss}>
+                  {this.noticationMsg}
+                </Alert>
+              </div>
+            : null
+          }
+        
           <br/>
           <div className={styles.filterArea}>
             <Button 

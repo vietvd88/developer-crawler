@@ -59,11 +59,20 @@ module.exports = class BaseModel {
         });
     }
 
-    get(fields, condition) {
-        return DB.select(fields)
+    get(fields, condition, limit, offset) {
+        var queryBuilder = DB.select(fields)
         .from(this.table)
         .where(condition)
-        .then(function(rows) {
+
+        if (limit != null && limit != undefined) {
+            queryBuilder = queryBuilder.limit(limit)
+        }
+
+        if (offset != null && offset != undefined) {
+            queryBuilder = queryBuilder.offset(offset)
+        }
+
+        return queryBuilder.then(function(rows) {
             return rows
         })
         .catch(function (err) {
