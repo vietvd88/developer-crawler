@@ -1,4 +1,3 @@
-const webdriverio = require('webdriverio')
 var FacebookDeveloper = require('../model/FacebookDeveloper')
 var FacebookDeveloperJob = require('../model/FacebookDeveloperJob')
 var FacebookDeveloperEducation = require('../model/FacebookDeveloperEducation')
@@ -8,19 +7,8 @@ module.exports = class Facebook {
     this.url = url
     this.done = false
     this.seedUrls = []
-    const options = {
-      host: 'localhost', // Use localhost as chrome driver server
-      port: 9515,        // "9515" is the port opened by chrome driver.
-      desiredCapabilities: {
-        browserName: 'chrome',
-        chromeOptions: {
-          binary: './node_modules/electron/dist/Electron.app/Contents/MacOS/Electron', // Path to your Electron binary.
-          args: [/* cli arguments */]           // Optional, perhaps 'app=' + /path/to/your/app/
-        }
-      }
-    }
 
-    this.browser = webdriverio.remote(options).init()
+    this.browser = getBrowser()
     this.developerModel = new FacebookDeveloper()
     this.jobModel = new FacebookDeveloperJob()
     this.educationModel = new FacebookDeveloperEducation()
@@ -52,10 +40,11 @@ module.exports = class Facebook {
   }
 
   getPeronalInformation(url) {
+    // return;
     this.getDeveloperInfo(url, (developerInfo, error) => {
         console.log(developerInfo)
-        this.getEducation(url)
-        this.getJob(url)
+        // this.getEducation(url)
+        // this.getJob(url)
     })
   }
 
@@ -68,32 +57,49 @@ module.exports = class Facebook {
     
     browser
     .url(url)
-    .element('.bu').then((response) => {
-        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'user_name')
+    .getTitle().then(function(name) {
+        developerInfo.user_name = name;
+        developerInfo.name = name;
     })
-    .element('.bu').then((response) => {
-        return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'name')
-    })
-    .getAttribute('.bp a img', 'src').then((response) => {
-        developerInfo.avatar = response;
-    })
-    .element('#contact-info tbody a').then((response) => {
+    // .element('#contact-info div[title="Facebook"] ._5cdv').then((response) => {
+    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'link')
+    // })
+    .element('#contact-info div[title="Websites"] ._5cdv').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'website')
     })
-    .element('#basic-info div[title="Birthday"] .ds').then((response) => {
+    .element('#basic-info div[title="Birthday"] ._5cdv').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'birthday')
     })
-    .element('#living div[title="Current City"] .ds').then((response) => {
+    // .element('#basic-info div[title="Gender"] ._5cdv').then((response) => {
+    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'gender')
+    // })
+    .element('#living div div header:nth-child(1) h4:nth-child(1)').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'location')
     })
-    .element('#living div[title="Hometown"] .ds').then((response) => {
+    .element('#living div div header:nth-child(2) h4:nth-child(1)').then((response) => {
         return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'hometown')
     })
+
+    // .getAttribute('.bp a img', 'src').then((response) => {
+    //     developerInfo.avatar = response;
+    // })
+    // .element('#contact-info tbody a').then((response) => {
+    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'website')
+    // })
+    // .element('#basic-info div[title="Birthday"] .ds').then((response) => {
+    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'birthday')
+    // })
+    // .element('#living div[title="Current City"] .ds').then((response) => {
+    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'location')
+    // })
+    // .element('#living div[title="Hometown"] .ds').then((response) => {
+    //     return crawler.getElemTextByElemResponse(browser, response, developerInfo, 'hometown')
+    // })
     .then(function () {
-      // console.log(developerInfo)
-        var condition = {user_name: developerInfo.user_name}
-        developerModel.update(condition, developerInfo)
-        callback(developerInfo, null)
+      console.log(developerInfo)
+      var condition = {user_name: developerInfo.user_name}
+      developerModel.update(condition, developerInfo)
+      callback(developerInfo, null)
     })
     .catch(function (error) {
         console.log(error)

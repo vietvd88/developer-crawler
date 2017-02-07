@@ -1,4 +1,3 @@
-const webdriverio = require('webdriverio')
 var QiitaDeveloper = require('../model/QiitaDeveloper')
 var QiitaDeveloperPost = require('../model/QiitaDeveloperPost')
 var DeveloperUrlQueue = require('../model/DeveloperUrlQueue')
@@ -8,19 +7,8 @@ module.exports = class Qiita {
     this.url = url
     this.done = false
     this.seedUrls = []
-    const options = {
-      host: 'localhost', // Use localhost as chrome driver server
-      port: 9515,        // "9515" is the port opened by chrome driver.
-      desiredCapabilities: {
-        browserName: 'chrome',
-        chromeOptions: {
-          binary: '../jobsearchapp/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron', // Path to your Electron binary.
-          args: [/* cli arguments */]           // Optional, perhaps 'app=' + /path/to/your/app/
-        }
-      }
-    }
 
-    this.browser = webdriverio.remote(options).init()
+    this.browser = getBrowser()
     this.developerModel = new QiitaDeveloper()
     this.postModel = new QiitaDeveloperPost()
     this.urlQueue = new DeveloperUrlQueue()
@@ -38,7 +26,7 @@ module.exports = class Qiita {
         // console.log(names)
         if (Array.isArray(names)) {
             for (var i = names.length - 1; i >= 0; i--) {
-                this.seedUrls.push('http://qiita.com/' + names[i])
+              this.seedUrls.push('http://qiita.com/' + names[i])
               urlQueue.insert({
                 url: 'http://qiita.com/' + names[i],
                 type: 'qiita'

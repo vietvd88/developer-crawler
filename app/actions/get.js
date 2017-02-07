@@ -64,17 +64,14 @@ export function getDeveloperListAsync(userName) {
         .then(values => {
           var developers, githubDevelopers, fbDevelopers, qiitaDevelopers, repos
           [githubDevelopers, fbDevelopers, qiitaDevelopers, repos] = values
-          githubDevelopers = githubDevelopers.filter(function(developer) { return developer.user_name != ''})
-          fbDevelopers = fbDevelopers.filter(function(developer) { return developer.user_name != ''})
-          qiitaDevelopers = qiitaDevelopers.filter(function(developer) { return developer.user_name != ''})
+          githubDevelopers = githubDevelopers.filter(function(developer) { developer.type = 'github'; return developer.user_name != ''})
+          fbDevelopers = fbDevelopers.filter(function(developer) { developer.type = 'facebook'; return developer.user_name != ''})
+          qiitaDevelopers = qiitaDevelopers.filter(function(developer) { developer.type = 'qiita'; return developer.user_name != ''})
 
-          // console.log('fbDevelopers', fbDevelopers)
           developers = []
           developers = developers.concat(fbDevelopers)
-          // developers = developers.concat(githubDevelopers)
-          // console.log('developers', developers)
-          // developers = developers.concat(fbDevelopers)
-          // console.log('developers', developers)
+          developers = developers.concat(githubDevelopers)
+          developers = developers.concat(qiitaDevelopers)
 
           for (var i = 0; i < developers.length; i++) {
             var developer = developers[i]

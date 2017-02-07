@@ -1,27 +1,17 @@
-const webdriverio = require('webdriverio')
 var GithubDeveloper = require('../model/GithubDeveloper')
 var GithubDeveloperRepo = require('../model/GithubDeveloperRepo')
+var DeveloperUrlQueue = require('../model/DeveloperUrlQueue')
 
 module.exports = class Github {
   constructor(url) {
     this.url = url
     this.done = false
     this.seedUrls = []
-    const options = {
-      host: 'localhost', // Use localhost as chrome driver server
-      port: 9515,        // "9515" is the port opened by chrome driver.
-      desiredCapabilities: {
-        browserName: 'chrome',
-        chromeOptions: {
-          binary: '../jobsearchapp/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron', // Path to your Electron binary.
-          args: [/* cli arguments */]           // Optional, perhaps 'app=' + /path/to/your/app/
-        }
-      }
-    }
 
-    this.browser = webdriverio.remote(options).init()
+    this.browser = getBrowser()
     this.developerModel = new GithubDeveloper()
     this.repoModel = new GithubDeveloperRepo()
+    this.urlQueue = new DeveloperUrlQueue()
   }
 
   getDeveloperList() {
@@ -60,17 +50,28 @@ module.exports = class Github {
   getSeedURLs(url, callback) {
     console.log('getSeedURLs')
     callback = callback || function () {};
+    var urlQueue = this.urlQueue
     var elemId
     this.browser
       .url(url)
       // get user name
       .getText('.username').then((names) => {
         if (Array.isArray(names)) {
-            for (var i = names.length - 1; i >= 0; i--) {
-                this.seedUrls.push('https://github.com/' + names[i])
-            }
+          for (var i = names.length - 1; i >= 0; i--) {
+            var developerUrl = 'https://github.com/' + names[i]
+            this.seedUrls.push(developerUrl)
+            urlQueue.insert({
+              url: developerUrl,
+              type: 'github'
+            })
+          }
         } else {
-            this.seedUrls.push('https://github.com/' + names)
+          var developerUrl = 'https://github.com/' + names
+          this.seedUrls.push(developerUrl)
+          urlQueue.insert({
+            url: developerUrl,
+            type: 'github'
+          })
         }
         
         this.getNextUserPage((url, callback) => { this.getSeedURLs(url, callback) }, callback, this.seedUrls)
